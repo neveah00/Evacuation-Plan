@@ -1,0 +1,180 @@
+package DijkstraPriorityQueueSolution;
+
+//DijkstraSolution - Using Priority Queue
+//Java program for the above approach
+import javax.swing.*;
+import java.io.*;
+import java.util.*;
+class DijkstraSolution {
+
+	// Node class
+	static class Node implements Comparator<Node> {
+
+		// Stores the node
+		public int node;
+
+		// Stores the distance of the edge
+		public int cost;
+
+		public Node() {}
+
+		// Constructor
+		public Node(int node, int cost) {
+			this.node = node;
+			this.cost = cost; }
+
+		// Costume comparator
+		@Override
+		public int compare(Node node1, Node node2) {
+			if (node1.cost < node2.cost)
+				return -1;
+			if (node1.cost > node2.cost)
+				return 1;
+			return 0; }
+	}
+	
+	
+
+	// Function to insert a node in adjacency list
+	static void addEdge(ArrayList<ArrayList<Node> > adj, int x, int y, int w) {
+		adj.get(x).add(new Node(y, w));
+		adj.get(y).add(new Node(x, w)); 
+	}
+	
+	
+
+	// Auxiliary function to find shortest paths using Dijkstra
+	static void dijkstra(ArrayList<ArrayList<Node> > adj, int src, int n, int dist[], int paths[]){
+		long startTime = System.nanoTime();
+		// Stores the distances of every node in shortest order
+		PriorityQueue<Node> pq = new PriorityQueue<Node>(n + 1, new Node());
+
+		// Stores if a vertex has been visited or not
+		Set<String> settled = new HashSet<String>();
+
+		// Adds the new source node with 0 distance to pq
+		pq.add(new Node(src, 0));
+
+		dist[src] = 0;
+		paths[src] = 1;
+
+		// While pq is not empty()
+		while (!pq.isEmpty()) {
+
+			// Stores the top node of pq
+			int u = pq.peek().node;
+
+			// Stores the distance of node u from s(given node)
+			int d = pq.peek().cost;
+
+			// Pop the top element
+			pq.poll();
+
+			for (int i = 0; i < adj.get(u).size(); i++) {
+				int to = adj.get(u).get(i).node;
+				int cost = adj.get(u).get(i).cost;
+
+				// If edge is marked
+				if (settled.contains(to + " " + u)) 
+					continue;
+				
+				// If dist[to] is greater than dist[u] + cost
+				if (dist[to] > dist[u] + cost) {
+
+					// Add the node to to the pq
+					pq.add(new Node(to, d + cost));
+
+					// Update dist[to]
+					dist[to] = dist[u] + cost;
+
+					// Update paths[to]
+					paths[to] = paths[u];	}
+
+				// Otherwise
+				else if (dist[to] == dist[u] + cost) {
+					paths[to] = (paths[to] + paths[u]);	}
+
+				// Mark the edge visited
+				settled.add(to + " " + u);
+				//System.out.printf("u:%2d  paths[u]:%2d  to:%2d  paths[to]:%2d  \n", u, paths[u], to, paths[to]);
+				//System.out.println(pq.peek().node+" "+pq.peek().cost);
+				//System.out.println();
+			}	}
+		long endTime = System.nanoTime();
+		long duration = (endTime - startTime);  //divide by 1000000 to get milliseconds.
+		System.out.println("Computational time: " + duration + " ns");
+	}
+	
+	
+
+	// Function to find the count of shortest path and
+	// distances from source node to every other node
+	static void findShortestPaths(ArrayList<ArrayList<Node> > adj, int s, int n)	{
+		
+		// Stores the distances of a node from source node
+		int[] dist = new int[n + 1];
+
+		// Stores the count of shortest paths of a node from source node
+		int[] paths = new int[n + 1];
+
+		for (int i = 0; i <= n; i++)
+			dist[i] = Integer.MAX_VALUE;
+
+		for (int i = 0; i <= n; i++)
+			paths[i] = 0;
+
+		// Function call to find the shortest paths
+		dijkstra(adj, s, n, dist, paths);
+		
+		JOptionPane.showMessageDialog(null, "Shortest distance for evacuation route from Node "+s
+				+ String.format("\nto Node %2d is:",10) 
+				+ String.format("\n\nDistance%3d",dist[10]) 
+				+ String.format("\nPath       %3d",paths[10])
+				, "Solution", JOptionPane.INFORMATION_MESSAGE);
+		
+	}
+	
+	// Driver Code
+	public static void main(String[] args) {
+		Scanner in = new Scanner(System.in);
+		// Input
+		int N = 10;
+		int M = 15;
+
+		ArrayList<ArrayList<Node> > adj = new ArrayList<>();
+
+		for (int i = 0; i <= N; i++) {
+			adj.add(new ArrayList<Node>());
+		}
+
+		addEdge(adj, 1, 2, 5);
+		addEdge(adj, 2, 3, 2);
+		addEdge(adj, 1, 3, 3);
+		addEdge(adj, 1, 4, 1);
+		addEdge(adj, 1, 6, 2);
+		addEdge(adj, 4, 6, 1);
+		addEdge(adj, 6, 5, 6);
+		addEdge(adj, 5, 7, 7);
+		addEdge(adj, 7, 8, 1);
+		addEdge(adj, 8, 9, 2);
+		addEdge(adj, 8, 9, 2);
+		addEdge(adj, 8, 10, 7);
+		addEdge(adj, 7, 10, 4);
+		addEdge(adj, 6, 10, 6);
+		addEdge(adj, 4, 10, 7);
+		addEdge(adj, 3, 10, 9);
+
+        String Place = JOptionPane.showInputDialog(null,"Where Are you?\n"
+        		+ "1 = Electric Tower\n"
+        		+ "2 = Walkway\n3 = Lab\n4 = Main Faculty\n5 = Photo View FSKTM\n"
+        		+ "6 = FSKTM Cubicle\n7 = Parking DKAP\n8 = DKAP A\n9 = DKAP B\n"
+        		+ "10 = Parking Faculty\n\n","Place Confirmation", 
+				JOptionPane.INFORMATION_MESSAGE);
+		int src = Integer.parseInt(Place);
+		System.out.println();
+		
+		// Function call
+		findShortestPaths(adj, src, N);
+	}
+	
+}
